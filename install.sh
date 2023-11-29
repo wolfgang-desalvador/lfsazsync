@@ -8,7 +8,7 @@ ssh_port="$5"
 github_release="$6"
 os_version="$7"
 install_copytool=${8:-false}
-import_data=${9:-false}"
+import_data=${9:-false}
 
 lfs_mount=/amlfs
 
