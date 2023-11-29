@@ -7,6 +7,8 @@ storage_container="$4"
 ssh_port="$5"
 github_release="$6"
 os_version="$7"
+install_copytool=${8:-false}
+import_data=${9:-false}"
 
 lfs_mount=/amlfs
 
@@ -195,15 +197,19 @@ WantedBy=multi-user.target
 EOF
 chmod 600 /etc/systemd/system/lhsmd.service
 
-systemctl daemon-reload
-systemctl enable lhsmd
-systemctl start lhsmd
+if [[ $(install_copytool) == true ]]; then
+    systemctl daemon-reload
+    systemctl enable lhsmd
+    systemctl start lhsmd
+fi
 
 ###############################################
 # Import from storage
 ###############################################
+if [[ $(import_data) == true ]]; then
 cd $lfs_mount
 STORAGE_SAS="?$storage_sas" /sbin/azure-import -account $storage_account -container $storage_container
+fi
 
 ###############################################
 # Robinhood setup
@@ -391,7 +397,7 @@ ChangeLog
 
         # id of the persistent changelog reader
         # as returned by "lctl changelog_register" command
-        reader_id = "cl1" ;
+        reader_id = "cl3" ;
     }
 
     # clear changelog every 1024 records:
@@ -633,8 +639,8 @@ EOF
 chmod 600 $lustremetasync_systemd_file
 
 # clear the lustre changelog to avoid processing old entries
-lfs changelog_clear lustrefs-MDT0000 cl1 0
 lfs changelog_clear lustrefs-MDT0000 cl2 0
+lfs changelog_clear lustrefs-MDT0000 cl3 0
 
 systemctl daemon-reload
 
